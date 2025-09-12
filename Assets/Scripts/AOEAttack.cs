@@ -4,15 +4,12 @@ using UnityEngine;
 public class AOEAttack : Attack
 {
   public float damage;
-  public float range;
 
-  public override void Execute(RectTransform attacker, Enemy target, Enemy[] allEnemies)
+  public override void Execute(RectTransform attacker, Enemy target, Enemy[] inRange)
   {
-    foreach (var enemy in allEnemies)
+    foreach (var enemy in inRange)
     {
-      float dist = Vector2.Distance(target.RectTransform.anchoredPosition, enemy.RectTransform.anchoredPosition);
-      if (dist <= range)
-        enemy.TakeDamage(damage);
+      enemy.TakeDamage(damage);
     }
   }
 }
