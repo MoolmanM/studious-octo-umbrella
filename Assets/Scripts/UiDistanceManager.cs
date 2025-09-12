@@ -6,23 +6,27 @@ public class UIDistanceManager : MonoBehaviour
 {
   [SerializeField] private RectTransform player;
   [SerializeField] private List<Enemy> enemies;
-  [SerializeField] private List<Button> attackButtons;
-  [SerializeField] private List<AttackData> attackDatas;
+  [SerializeField] private Button[] attackButtons;
+  [SerializeField] private Attack[] attacks; // ScriptableObjects for each attack
 
   private void Start()
   {
-    for (int i = 0; i < attackButtons.Count; i++)
+    for (int i = 0; i < attackButtons.Length; i++)
     {
-      int index = i;
-      attackButtons[i].onClick.AddListener(() => AttackClosestEnemy(attackDatas[index]));
+      int index = i; // local capture
+      attackButtons[i].onClick.AddListener(() =>
+      {
+        Enemy target = GetClosestEnemy();
+        if (target != null)
+          attacks[index].Execute(player, target, enemies.ToArray());
+      });
     }
   }
 
-  private Enemy GetClosetEnemy()
+  private Enemy GetClosestEnemy()
   {
     Enemy closest = null;
     float minDist = float.MaxValue;
-
 
     foreach (var enemy in enemies)
     {
@@ -37,26 +41,4 @@ public class UIDistanceManager : MonoBehaviour
     }
     return closest;
   }
-
-  private void AttackClosestEnemy(AttackData attack)
-  {
-    Enemy target = GetClosetEnemy();
-    if (target == null) return;
-
-    foreach (var enemy in enemies)
-    {
-      if (enemy.IsDead) continue;
-
-      float distToTarget = Vector2.Distance(
-          target.RectTransform.anchoredPosition,
-          enemy.RectTransform.anchoredPosition);
-
-      if (distToTarget <= attack.range)
-      {
-        enemy.TakeDamage(attack.damage);
-      }
-    }
-  }
 }
-
-
