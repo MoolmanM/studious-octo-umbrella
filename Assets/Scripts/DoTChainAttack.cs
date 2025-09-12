@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 [CreateAssetMenu(menuName = "Attacks/DoT Chain Attack")]
 public class DoTChainAttack : Attack
@@ -8,20 +9,39 @@ public class DoTChainAttack : Attack
   public float duration;
   public float chainRange;
 
+  private HashSet<Enemy> activeDOTs = new HashSet<Enemy>();
+
   public override void Execute(RectTransform attacker, Enemy target, Enemy[] allEnemies)
   {
-    target.StartCoroutine(DamageOverTime(target));
+    ApplyDOT(target, allEnemies);
+  }
 
-    target.OnDeath += (deadEnemy) =>
+  private void ApplyDOT(Enemy enemy, Enemy[] allEnemies)
+  {
+    if (enemy == null || enemy.IsDead || activeDOTs.Contains(enemy))
+      return;
+
+    activeDOTs.Add(enemy);
+    enemy.StartCoroutine(DamageOverTime(enemy));
+
+    void HandleDeath(Enemy deadEnemy)
     {
-      foreach (var enemy in allEnemies)
+      enemy.OnDeath -= HandleDeath;
+      activeDOTs.Remove(enemy);
+
+      foreach (var other in allEnemies)
       {
-        if (enemy.IsDead) continue;
-        float dist = Vector2.Distance(deadEnemy.RectTransform.anchoredPosition, enemy.RectTransform.anchoredPosition);
+        if (other.IsDead || activeDOTs.Contains(other)) continue;
+
+        float dist = Vector2.Distance(deadEnemy.RectTransform.anchoredPosition, other.RectTransform.anchoredPosition);
         if (dist <= chainRange)
-          enemy.StartCoroutine(DamageOverTime(enemy));
+        {
+          ApplyDOT(other, allEnemies);
+        }
       }
-    };
+    }
+
+    enemy.OnDeath += HandleDeath;
   }
 
   private IEnumerator DamageOverTime(Enemy enemy)
@@ -33,5 +53,8 @@ public class DoTChainAttack : Attack
       elapsed += Time.deltaTime;
       yield return null;
     }
+
+    if (!enemy.IsDead)
+      activeDOTs.Remove(enemy);
   }
 }
