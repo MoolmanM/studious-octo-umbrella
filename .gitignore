@@ -1,0 +1,31 @@
+# Ignore everything in Library, Temp, Build etc.
+Library/
+Temp/
+Obj/
+Build/
+Builds/
+Logs/
+UserSettings/
+MemoryCaptures/
+TextMesh Pro/
+Packages/
+ProjectSettings/
+.vsconfig
+*.csproj
+*.sln
+
+# Ignore OS junk
+.DS_Store
+Thumbs.db
+
+# Ignore other assets if you want
+Assets/**/*.meta
+Assets/**/*.unity
+Assets/**/*.prefab
+Assets/**/*.asset
+Assets/**/*.mat
+Assets/**/*.png
+Assets/**/*.jpg
+
+# But include all .cs scripts in Assets/Scripts
+!Assets/Scripts/**/*.cs
