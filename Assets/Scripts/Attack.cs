@@ -2,6 +2,11 @@ using UnityEngine;
 
 public abstract class Attack : ScriptableObject
 {
-  public string attackName;
-  public abstract void Execute(RectTransform attacker, Enemy target, Enemy[] allEnemies);
+  [SerializeField] private bool useRange = false;
+  [SerializeField] public float rangeX;
+  [SerializeField] public float rangeY;
+
+  public abstract void Execute(RectTransform attacker, Enemy target, Enemy[] inRange);
+
+  public bool HasRange => useRange;
 }
