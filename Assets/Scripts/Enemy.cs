@@ -7,7 +7,6 @@ public class Enemy : MonoBehaviour
 {
   [SerializeField] private float maxHealth = 100f;
   [SerializeField] private Slider healthBar;
-  [SerializeField] private TMP_Text healthText;
 
   private float currentHealth;
 
@@ -34,9 +33,6 @@ public class Enemy : MonoBehaviour
   {
     if (healthBar != null)
       healthBar.value = currentHealth / maxHealth;
-
-    if (healthText != null)
-      healthText.text = $"{currentHealth}/{maxHealth}";
   }
 
   private void Die()
