@@ -17,8 +17,15 @@ public class UIDistanceManager : MonoBehaviour
       attackButtons[i].onClick.AddListener(() =>
       {
         Enemy target = GetClosestEnemy();
+        List<Enemy> inRange = new List<Enemy>();
+
+        if (attacks[index].HasRange && target != null)
+        {
+          inRange = GetEnemiesInRange(attacks[index].rangeX, attacks[index].rangeY);
+        }
+
         if (target != null)
-          attacks[index].Execute(player, target, enemies.ToArray());
+          attacks[index].Execute(player, target, inRange.ToArray());
       });
     }
   }
@@ -32,7 +39,10 @@ public class UIDistanceManager : MonoBehaviour
     {
       if (enemy.IsDead) continue;
 
-      float dist = Vector2.Distance(player.anchoredPosition, enemy.RectTransform.anchoredPosition);
+      Vector3 playerScreenPos = RectTransformUtility.WorldToScreenPoint(null, player.position);
+      Vector3 enemyScreenPos = RectTransformUtility.WorldToScreenPoint(null, enemy.RectTransform.position);
+      float dist = Vector3.Distance(playerScreenPos, enemyScreenPos);
+
       if (dist < minDist)
       {
         minDist = dist;
@@ -40,5 +50,41 @@ public class UIDistanceManager : MonoBehaviour
       }
     }
     return closest;
+  }
+
+  private List<Enemy> GetEnemiesInRange(float radiusx, float radiusy)
+  {
+    List<Enemy> inRange = new List<Enemy>();
+
+    Enemy closest = GetClosestEnemy();
+    Vector2 closestPos = closest.RectTransform.position;
+
+    foreach (var enemy in enemies)
+    {
+      if (enemy.IsDead) continue;
+
+      Vector2 targetPos = enemy.RectTransform.position;
+      Vector2 halfSize = enemy.RectTransform.rect.size * 0.5f;
+
+      Vector2 diff = closestPos - targetPos;
+      Vector2 clamped = new Vector2(
+          Mathf.Clamp(diff.x, -halfSize.x, halfSize.x),
+          Mathf.Clamp(diff.y, -halfSize.y, halfSize.y)
+      );
+
+      // Nearest oint on rect (in world spave)
+      Vector2 nearestPoint = targetPos + clamped;
+
+      // Convert into ellipse
+      float dx = (nearestPoint.x - closestPos.x) / radiusx;
+      float dy = (nearestPoint.y - closestPos.y) / radiusy;
+      float ellipseDist = dx * dx + dy * dy;
+
+      if (ellipseDist <= 1f)
+      {
+        inRange.Add(enemy);
+      }
+    }
+    return inRange;
   }
 }
