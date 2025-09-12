@@ -7,16 +7,15 @@ public class DoTChainAttack : Attack
 {
   public float damagePerSecond;
   public float duration;
-  public float chainRange;
 
   private HashSet<Enemy> activeDOTs = new HashSet<Enemy>();
 
-  public override void Execute(RectTransform attacker, Enemy target, Enemy[] allEnemies)
+  public override void Execute(RectTransform attacker, Enemy target, Enemy[] inRange)
   {
-    ApplyDOT(target, allEnemies);
+    ApplyDOT(target, inRange);
   }
 
-  private void ApplyDOT(Enemy enemy, Enemy[] allEnemies)
+  private void ApplyDOT(Enemy enemy, Enemy[] inRange)
   {
     if (enemy == null || enemy.IsDead || activeDOTs.Contains(enemy))
       return;
@@ -29,15 +28,10 @@ public class DoTChainAttack : Attack
       enemy.OnDeath -= HandleDeath;
       activeDOTs.Remove(enemy);
 
-      foreach (var other in allEnemies)
+      foreach (var other in inRange)
       {
         if (other.IsDead || activeDOTs.Contains(other)) continue;
-
-        float dist = Vector2.Distance(deadEnemy.RectTransform.anchoredPosition, other.RectTransform.anchoredPosition);
-        if (dist <= chainRange)
-        {
-          ApplyDOT(other, allEnemies);
-        }
+        ApplyDOT(other, inRange);
       }
     }
 
