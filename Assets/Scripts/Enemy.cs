@@ -5,42 +5,44 @@ using System;
 
 public class Enemy : MonoBehaviour
 {
-  [SerializeField] private float maxHealth = 100f;
-  [SerializeField] private Slider healthBar;
 
-  private float currentHealth;
+    //[SerializeField] private RectTransform rectTransform;
+    [SerializeField] private float maxHealth = 100f;
+    [SerializeField] private Slider healthBar;
 
-  public event Action<Enemy> OnDeath;
+    private float currentHealth;
 
-  private void Awake()
-  {
-    currentHealth = maxHealth;
-    UpdateUI();
-  }
+    public event Action<Enemy> OnDeath;
 
-  public void TakeDamage(float amount)
-  {
-    currentHealth -= amount;
-    if (currentHealth < 0) currentHealth = 0;
+    private void Awake()
+    {
+        currentHealth = maxHealth;
+        UpdateUI();
+    }
 
-    UpdateUI();
+    public void TakeDamage(float amount)
+    {
+        currentHealth -= amount;
+        if (currentHealth < 0) currentHealth = 0;
 
-    if (currentHealth <= 0)
-      Die();
-  }
+        UpdateUI();
 
-  private void UpdateUI()
-  {
-    if (healthBar != null)
-      healthBar.value = currentHealth / maxHealth;
-  }
+        if (currentHealth <= 0)
+            Die();
+    }
 
-  private void Die()
-  {
-    OnDeath?.Invoke(this);
-    gameObject.SetActive(false);
-  }
+    private void UpdateUI()
+    {
+        if (healthBar != null)
+            healthBar.value = currentHealth / maxHealth;
+    }
 
-  public bool IsDead => currentHealth <= 0;
-  public RectTransform RectTransform => (RectTransform)transform;
+    private void Die()
+    {
+        OnDeath?.Invoke(this);
+        gameObject.SetActive(false);
+    }
+
+    public bool IsDead => currentHealth <= 0;
+    public RectTransform RectTransform => (RectTransform)transform;
 }
