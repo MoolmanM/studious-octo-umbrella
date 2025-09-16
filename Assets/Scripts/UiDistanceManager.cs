@@ -2,35 +2,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIDistanceManager : MonoBehaviour
+public static class DistanceUtils
 {
-  [SerializeField] private RectTransform player;
-  [SerializeField] private List<Enemy> enemies;
-  [SerializeField] private Button[] attackButtons;
-  [SerializeField] private Attack[] attacks; // ScriptableObjects for each attack
-
-  private void Start()
-  {
-    for (int i = 0; i < attackButtons.Length; i++)
-    {
-      int index = i; // local capture
-      attackButtons[i].onClick.AddListener(() =>
-      {
-        Enemy target = GetClosestEnemy();
-        List<Enemy> inRange = new List<Enemy>();
-
-        if (attacks[index].HasRange && target != null)
-        {
-          inRange = GetEnemiesInRange(attacks[index].rangeX, attacks[index].rangeY);
-        }
-
-        if (target != null)
-          attacks[index].Execute(player, target, inRange.ToArray());
-      });
-    }
-  }
-
-  private Enemy GetClosestEnemy()
+  public static Enemy GetClosestEnemy(Player plyaer, List<Enemy> enemies)
   {
     Enemy closest = null;
     float minDist = float.MaxValue;
@@ -52,14 +26,12 @@ public class UIDistanceManager : MonoBehaviour
     return closest;
   }
 
-  private List<Enemy> GetEnemiesInRange(float radiusx, float radiusy)
+  public static List<Enemy> GetEnemiesInEllipse(Enemy closest, float radiusx, float radiusy, List<Enemy> aliveEnemies)
   {
     List<Enemy> inRange = new List<Enemy>();
-
-    Enemy closest = GetClosestEnemy();
     Vector2 closestPos = closest.RectTransform.position;
 
-    foreach (var enemy in enemies)
+    foreach (var enemy in aliveEnemies)
     {
       if (enemy.IsDead) continue;
 
