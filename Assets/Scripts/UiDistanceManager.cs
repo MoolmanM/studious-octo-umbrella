@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public static class DistanceUtils
 {
-  public static Enemy GetClosestEnemy(Player plyaer, List<Enemy> enemies)
+  public static Enemy GetClosestEnemy(Player player, List<Enemy> enemies)
   {
     Enemy closest = null;
     float minDist = float.MaxValue;
