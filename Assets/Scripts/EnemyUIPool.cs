@@ -6,29 +6,55 @@ public class EnemyUIPool : MonoBehaviour
     [SerializeField] private GameObject enemyUIPrefab;
     [SerializeField] private Transform enemyParent;
 
-    private Queue<EnemyUIController> pool = new Queue<EnemyUIController>();
+    private Queue<GameObject> pool = new Queue<GameObject>();
 
-    public EnemyUIController Get(Enemy enemyData)
+    public GameObject Prefab => enemyUIPrefab;
+    public Transform Parent => enemyParent;
+
+    public GameObject Get()
     {
-        EnemyUIController ui;
+        GameObject enemyObj;
         if (pool.Count > 0)
         {
-            ui = pool.Dequeue();
-            ui.gameObject.SetActive(true);
+            enemyObj = pool.Dequeue();
+            enemyObj.SetActive(true);
         }
         else
         {
-            GameObject obj = Instantiate(enemyUIPrefab, enemyParent);
-            ui = obj.GetComponent<EnemyUIController>();
+            enemyObj = Instantiate(enemyUIPrefab, enemyParent);
         }
 
-        ui.Bind(enemyData);
-        return ui;
+        EnemyUIController ui = enemyObj.GetComponent<EnemyUIController>();
+        if (ui != null)
+            ui.Bind(); // Auto-bind to local Enemy
+
+        return enemyObj;
     }
 
-    public void Return(EnemyUIController ui)
+    public void Return(GameObject enemyObj)
     {
-        ui.gameObject.SetActive(false);
-        pool.Enqueue(ui);
+        if (enemyObj != null)
+        {
+            EnemyUIController ui = enemyObj.GetComponent<EnemyUIController>();
+            if (ui != null)
+                ui.Unbind();
+            enemyObj.SetActive(false);
+            pool.Enqueue(enemyObj);
+        }
+    }
+
+    public void PreWarm(int count)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            if (pool.Count == 0)
+            {
+                GameObject obj = Instantiate(enemyUIPrefab, enemyParent);
+                EnemyUIController newUi = obj.GetComponent<EnemyUIController>();
+                if (newUi != null)
+                    newUi.Bind(); // Auto-bind for pre-warm
+                Return(obj);
+            }
+        }
     }
 }
