@@ -13,6 +13,8 @@ public static class DistanceUtils
     {
       if (enemy.IsDead) continue;
 
+      // TODO: Should probably not use player and enemy class, instead just use their transforms.
+
       //Vector3 playerScreenPos = RectTransformUtility.WorldToScreenPoint(null, player.ectTransform);
       Vector3 enemyScreenPos = RectTransformUtility.WorldToScreenPoint(null, enemy.RectTransform.position);
       //float dist = Vector3.Distance(playerScreenPos, enemyScreenPos); 
@@ -45,7 +47,7 @@ public static class DistanceUtils
           Mathf.Clamp(diff.y, -halfSize.y, halfSize.y)
       );
 
-      // Nearest oint on rect (in world spave)
+      // Nearest point on rect (in world space)
       Vector2 nearestPoint = targetPos + clamped;
 
       // Convert into ellipse
