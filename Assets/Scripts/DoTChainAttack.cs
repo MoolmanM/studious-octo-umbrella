@@ -8,7 +8,7 @@ public class DoTChainAttack : Attack
   public float damagePerSecond;
   public float duration;
 
-  private HashSet<Enemy> activeDOTs = new HashSet<Enemy>();
+  private static HashSet<Enemy> activeDOTs = new HashSet<Enemy>(); // Static to share across instances
 
   public override void Execute(RectTransform attacker, Enemy target, Enemy[] inRange)
   {
@@ -21,34 +21,39 @@ public class DoTChainAttack : Attack
       return;
 
     activeDOTs.Add(enemy);
-    enemy.StartCoroutine(DamageOverTime(enemy));
+    enemy.StartCoroutine(DamageOverTime(enemy, inRange));
 
-    void HandleDeath(Enemy deadEnemy)
+    enemy.OnDeath += (deadEnemy) =>
     {
-      enemy.OnDeath -= HandleDeath;
+      enemy.OnDeath -= (d) => { }; // Unsubscribe
       activeDOTs.Remove(enemy);
+      ChainToOthers(deadEnemy, inRange);
+    };
+  }
 
-      foreach (var other in inRange)
+  private void ChainToOthers(Enemy deadEnemy, Enemy[] inRange)
+  {
+    foreach (var other in inRange)
+    {
+      if (other != null && !other.IsDead && !activeDOTs.Contains(other))
       {
-        if (other.IsDead || activeDOTs.Contains(other)) continue;
         ApplyDOT(other, inRange);
       }
     }
-
-    enemy.OnDeath += HandleDeath;
   }
 
-  private IEnumerator DamageOverTime(Enemy enemy)
+  private IEnumerator DamageOverTime(Enemy enemy, Enemy[] inRange)
   {
     float elapsed = 0f;
     while (elapsed < duration && !enemy.IsDead)
     {
-      enemy.TakeDamage(damagePerSecond * Time.deltaTime);
+      if (enemy != null)
+        enemy.TakeDamage(damagePerSecond * Time.deltaTime);
       elapsed += Time.deltaTime;
       yield return null;
     }
 
-    if (!enemy.IsDead)
+    if (enemy != null && !enemy.IsDead)
       activeDOTs.Remove(enemy);
   }
 }
