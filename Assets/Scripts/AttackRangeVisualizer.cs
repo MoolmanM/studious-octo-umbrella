@@ -1,13 +1,11 @@
 using UnityEngine;
 
-using UnityEngine;
-
 public class AttackRangeVisualizer : MonoBehaviour
 {
-  public RectTransform enemy;   // assign in inspector
-  public float ellipseX = 50f;  // horizontal radius
-  public float ellipseY = 25f;  // vertical radius
-  public int ellipseSegments = 40; // smoothness of ellipse
+  public RectTransform enemy;
+  public float ellipseX = 50f;
+  public float ellipseY = 25f;
+  public int ellipseSegments = 40;
 
   private void OnDrawGizmos()
   {
@@ -16,11 +14,9 @@ public class AttackRangeVisualizer : MonoBehaviour
     Vector3 pos = enemy.position;
     Vector2 size = enemy.rect.size;
 
-    // --- Draw rectangle (matches enemy size) ---
     Gizmos.color = Color.yellow;
     Gizmos.DrawWireCube(pos, size);
 
-    // --- Draw ellipse centered on enemy ---
     Gizmos.color = Color.cyan;
     DrawEllipse(pos, ellipseX, ellipseY, ellipseSegments);
   }
