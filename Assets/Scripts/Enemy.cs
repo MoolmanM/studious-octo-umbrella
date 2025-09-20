@@ -1,41 +1,46 @@
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
 using System;
 
 public class Enemy : MonoBehaviour
 {
-
-    //[SerializeField] private RectTransform rectTransform;
-    [SerializeField] private float maxHealth = 100f;
-    [SerializeField] private Slider healthBar;
+    [SerializeField] private float baseHealth = 100f;
+    [SerializeField] private float maxHealth;
+    [SerializeField] private int level = 1;
 
     private float currentHealth;
 
     public event Action<Enemy> OnDeath;
+    public event Action<float> OnHealthChanged;
+
+    public float BaseHealth => baseHealth;
+    public float MaxHealth => maxHealth;
+    public float CurrentHealth => currentHealth;
+    public int Level => level;
 
     private void Awake()
     {
+        Initialize(1);
+    }
+
+    public void Initialize(int newLevel, float healthMultiplier = 1f)
+    {
+        level = newLevel;
+        maxHealth = baseHealth * level * healthMultiplier;
         currentHealth = maxHealth;
-        UpdateUI();
+        OnHealthChanged?.Invoke(1f);
     }
 
     public void TakeDamage(float amount)
     {
         currentHealth -= amount;
-        if (currentHealth < 0) currentHealth = 0;
+        if (currentHealth < 0.01f) currentHealth = 0;
 
-        UpdateUI();
+        OnHealthChanged?.Invoke(currentHealth / maxHealth);
 
         if (currentHealth <= 0)
             Die();
     }
 
-    private void UpdateUI()
-    {
-        if (healthBar != null)
-            healthBar.value = currentHealth / maxHealth;
-    }
 
     private void Die()
     {
