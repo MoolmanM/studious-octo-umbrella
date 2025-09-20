@@ -15,8 +15,8 @@ public class DebugUI : MonoBehaviour
 
     private void Awake()
     {
-        waveSpawner = FindObjectOfType<WaveSpawner>();
-        enemyManager = FindObjectOfType<EnemyManager>();
+        waveSpawner = FindAnyObjectByType<WaveSpawner>();
+        enemyManager = FindAnyObjectByType<EnemyManager>();
 
         if (debugText == null)
         {
