@@ -8,9 +8,9 @@ public class EnemyManager : MonoBehaviour
 {
     [SerializeField] private int testSpawnCount = 5;
     [SerializeField] private Player player;
-    [SerializeField] private Attack selectedAttack;
+    [SerializeField] private Attack[] attacks = new Attack[4];
 
-    [SerializeField] private bool autoAttackEnabled = true;
+    [SerializeField] private bool[] autoAttackEnabled = new bool[4];
     [SerializeField] private float attackInterval = 2f;
 
     [SerializeField] private EnemyUIPool uiPool;
@@ -37,10 +37,12 @@ public class EnemyManager : MonoBehaviour
         return $"Avg: {avgLevel:F1} (Range: {minLevel}-{maxLevel})";
     }
 
-    private float lastAttackTime = 0f;
+    private float[] lastAttackTimes;
 
     private void Awake()
     {
+        lastAttackTimes = new float[4];
+
         if (uiPool != null)
         {
             uiPool.PreWarm(initialPoolSize);
@@ -50,27 +52,30 @@ public class EnemyManager : MonoBehaviour
             Debug.LogError("UI Pool is not assigned.");
         }
 
-        if (autoAttackEnabled)
-        {
-            StartCoroutine(AutoAttackLoop());
-        }
+        StartCoroutine(AutoAttackLoop());
     }
 
     private IEnumerator AutoAttackLoop()
     {
         while (true)
         {
-            if (activeEnemies.Count > 0 && selectedAttack != null && player != null)
+            if (activeEnemies.Count > 0 && player != null)
             {
                 var aliveEnemies = activeEnemies.Where(e => !e.IsDead).ToList();
                 if (aliveEnemies.Count > 0)
                 {
                     Enemy target = DistanceUtils.GetClosestEnemy(player, aliveEnemies);
-                    if (target != null && Time.time > lastAttackTime + attackInterval)
+                    if (target != null)
                     {
-                        Enemy[] inRange = GetEnemiesInRange(target);
-                        selectedAttack.Execute(player.RectTransform, target, inRange);
-                        lastAttackTime = Time.time;
+                        for (int i = 0; i < attacks.Length; i++)
+                        {
+                            if (autoAttackEnabled[i] && attacks[i] != null && Time.time > lastAttackTimes[i] + attackInterval)
+                            {
+                                Enemy[] inRange = GetEnemiesInRange(target, attacks[i]);
+                                attacks[i].Execute(player.RectTransform, target, inRange);
+                                lastAttackTimes[i] = Time.time;
+                            }
+                        }
                     }
                 }
             }
@@ -130,6 +135,37 @@ public class EnemyManager : MonoBehaviour
         }
     }
 
+    public void ExecuteAttack(int index)
+    {
+        if (index < 0 || index >= attacks.Length || attacks[index] == null || player == null || activeEnemies.Count == 0)
+        {
+            return;
+        }
+
+        var aliveEnemies = activeEnemies.Where(e => !e.IsDead).ToList();
+        if (aliveEnemies.Count == 0) return;
+
+        Enemy target = DistanceUtils.GetClosestEnemy(player, aliveEnemies);
+        if (target != null)
+        {
+            Enemy[] inRange = GetEnemiesInRange(target, attacks[index]);
+            attacks[index].Execute(player.RectTransform, target, inRange);
+        }
+    }
+
+    public void SetAutoAttack(int index, bool enabled)
+    {
+        if (index >= 0 && index < autoAttackEnabled.Length)
+        {
+            autoAttackEnabled[index] = enabled;
+        }
+    }
+
+    public bool GetAutoAttack(int index)
+    {
+        return index >= 0 && index < autoAttackEnabled.Length ? autoAttackEnabled[index] : false;
+    }
+
     public void ReturnEnemyUI(GameObject objEnemy)
     {
         if (objEnemy == null) return;
@@ -152,24 +188,20 @@ public class EnemyManager : MonoBehaviour
 
     private void HandleEnemySelected(Enemy enemy)
     {
-        if (selectedAttack == null || player == null)
+        if (attacks.Length == 0 || attacks[0] == null || player == null)
         {
             Debug.LogWarning("Selected attack or player not assigned.");
             return;
         }
 
-        Enemy[] inRange = GetEnemiesInRange(enemy);
-        selectedAttack.Execute(player.RectTransform, enemy, inRange);
+        Enemy[] inRange = GetEnemiesInRange(enemy, attacks[0]);
+        attacks[0].Execute(player.RectTransform, enemy, inRange);
     }
 
-    private Enemy[] GetEnemiesInRange(Enemy target)
+    private Enemy[] GetEnemiesInRange(Enemy target, Attack attack)
     {
-        if (target == null || selectedAttack == null || !selectedAttack.HasRange)
-            return new Enemy[0];
-
-        var aliveEnemies = activeEnemies.Where(e => !e.IsDead).ToList();
-        var inRangeList = DistanceUtils.GetEnemiesInEllipse(target, selectedAttack.rangeX, selectedAttack.rangeY, aliveEnemies);
-        return inRangeList.ToArray();
+        var aliveEnemies = activeEnemies.Where(e => !e.IsDead).ToArray();
+        return attack.GetEnemiesInRange(target, aliveEnemies);
     }
 
     [ContextMenu("Test Spawn")]
