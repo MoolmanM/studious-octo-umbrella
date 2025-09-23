@@ -8,7 +8,7 @@ public class DoTChainAttack : Attack
   public float damagePerSecond;
   public float duration;
 
-  private static HashSet<Enemy> activeDOTs = new HashSet<Enemy>(); // Static to share across instances
+  private static HashSet<Enemy> activeDOTs = new HashSet<Enemy>();
 
   public override void Execute(RectTransform attacker, Enemy target, Enemy[] inRange)
   {
@@ -25,7 +25,7 @@ public class DoTChainAttack : Attack
 
     enemy.OnDeath += (deadEnemy) =>
     {
-      enemy.OnDeath -= (d) => { }; // Unsubscribe
+      enemy.OnDeath -= (d) => { };
       activeDOTs.Remove(enemy);
       ChainToOthers(deadEnemy, inRange);
     };
