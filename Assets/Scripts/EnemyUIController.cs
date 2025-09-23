@@ -30,7 +30,7 @@ public class EnemyUIController : MonoBehaviour
     if (healthSlider != null)
     {
       healthSlider.value = boundEnemy.CurrentHealth / boundEnemy.MaxHealth;
-      boundEnemy.OnHealthChanged += UpdateHealth;
+      boundEnemy.OnHealthChanged += UpdateHealthBar;
     }
 
     boundEnemy.OnDeath += HandleDeath;
@@ -43,7 +43,7 @@ public class EnemyUIController : MonoBehaviour
   {
     if (boundEnemy != null)
     {
-      boundEnemy.OnHealthChanged -= UpdateHealth;
+      boundEnemy.OnHealthChanged -= UpdateHealthBar;
       boundEnemy.OnDeath -= HandleDeath;
       boundEnemy = null;
     }
@@ -51,7 +51,7 @@ public class EnemyUIController : MonoBehaviour
     attackButton.onClick.RemoveAllListeners();
   }
 
-  private void UpdateHealth(float percentage)
+  private void UpdateHealthBar(float percentage)
   {
     if (healthSlider != null)
       healthSlider.value = percentage;
