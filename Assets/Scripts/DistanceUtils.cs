@@ -62,4 +62,24 @@ public static class DistanceUtils
     }
     return inRange;
   }
+
+  public static List<Enemy> GetEnemiesInCircle(Enemy closest, float radius, List<Enemy> aliveEnemies)
+  {
+    List<Enemy> inRange = new List<Enemy>();
+    Vector2 closestPos = closest.RectTransform.position;
+
+    foreach (var enemy in aliveEnemies)
+    {
+      if (enemy.IsDead) continue;
+
+      Vector2 targetPos = enemy.RectTransform.position;
+      float dist = Vector2.Distance(closestPos, targetPos);
+
+      if (dist <= radius)
+      {
+        inRange.Add(enemy);
+      }
+    }
+    return inRange;
+  }
 }
