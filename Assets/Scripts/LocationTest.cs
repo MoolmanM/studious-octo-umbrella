@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class LocationTest : MonoBehaviour
 {
+
     [SerializeField] private float enemyQuantity = 1f;
     [SerializeField] private float enemyCommonQuantity = 1f;
 
