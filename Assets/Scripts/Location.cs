@@ -9,7 +9,7 @@ enum PackRarity { common, uncommon, rare, unique }
 class Pack
 {
     public PackRarity Rarity { get; }
-    public int Size { get; }
+    public int Size { get; } // set?
     public int Cost { get; set; }
     public int Weight { get; set; }
 
